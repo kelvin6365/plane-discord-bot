@@ -18,13 +18,13 @@ module.exports = {
     await interaction.deferReply({ ephemeral: true });
 
     try {
-      const guildId = interaction.guild.id;
+      const guildId = interaction.guildId;
       const channelId = interaction.channelId;
 
       logger.info("Plane remove command initiated", {
         user: interaction.user.tag,
-        guild: interaction.guild.name,
-        channel: interaction.channel.name,
+        guild: interaction.guildId,
+        channel: interaction.channelId,
       });
 
       // Get current config before removing (for display)
@@ -48,8 +48,8 @@ module.exports = {
 
       logger.info("Channel config removed", {
         user: interaction.user.tag,
-        guild: interaction.guild.name,
-        channel: interaction.channel.name,
+        guild: interaction.guildId,
+        channel: interaction.channelId,
         previousWorkspace: config.workspaceSlug,
         previousProject: config.projectId,
       });

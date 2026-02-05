@@ -1,10 +1,5 @@
 require("dotenv").config();
-const {
-  Client,
-  Collection,
-  Events,
-  GatewayIntentBits,
-} = require("discord.js");
+const { Client, Collection, Events, GatewayIntentBits } = require("discord.js");
 const fs = require("node:fs");
 const path = require("node:path");
 const config = require("./config/config");
@@ -65,10 +60,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
 
       try {
+        const guildId = interaction.guildId;
+        const channelId = interaction.channelId;
         logger.debug(`Executing command: ${interaction.commandName}`, {
           user: interaction.user.tag,
-          guild: interaction.guild?.name,
-          channel: interaction.channel?.name,
+          guildId,
+          channelId,
         });
 
         // Build execution context
@@ -81,8 +78,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
         if (!ADMIN_COMMANDS.includes(interaction.commandName)) {
           // Get channel configuration
           const channelConfig = await channelConfigManager.getConfig(
-            interaction.guild.id,
-            interaction.channelId
+            guildId,
+            channelId
           );
 
           if (channelConfig) {

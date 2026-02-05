@@ -14,18 +14,18 @@
     "deploy": "node src/deploy-commands.js"
   },
   "dependencies": {
-    "axios": "^1.6.7",
-    "discord.js": "^14.14.1",
+    "axios": "^1.13.4",
+    "discord.js": "^14.25.1",
     "dotenv": "^16.4.5",
-    "form-data": "^4.0.0",
+    "form-data": "^4.0.5",
     "node-fetch": "^3.3.2",
-    "winston": "^3.17.0"
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
   },
   "optionalDependencies": {
-    "better-sqlite3": "^11.0.0"
+    "better-sqlite3": "^12.6.2"
   },
   "engines": {
     "node": ">=16.9.0"

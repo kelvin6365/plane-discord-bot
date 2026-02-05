@@ -13,13 +13,13 @@ module.exports = {
     await interaction.deferReply({ ephemeral: true });
 
     try {
-      const guildId = interaction.guild.id;
+      const guildId = interaction.guildId;
       const channelId = interaction.channelId;
 
       logger.debug("Plane config command initiated", {
         user: interaction.user.tag,
-        guild: interaction.guild.name,
-        channel: interaction.channel.name,
+        guild: interaction.guildId,
+        channel: interaction.channelId,
       });
 
       const config = await channelConfigManager.getConfig(guildId, channelId);

@@ -89,6 +89,8 @@ The bot supports connecting different Discord channels to different Plane worksp
 - Have dedicated channels for different workspaces
 - Manage multiple Plane instances from a single Discord server
 
+> **Important:** Issue commands (`/create-issue`, `/get-issues`, `/view-issue`, `/upload-file`) will only work in channels that have been configured with `/plane-setup`. Unconfigured channels will show a "Channel Not Configured" message prompting an admin to run the setup command.
+
 ### Admin Commands
 
 | Command | Description | Permission |
@@ -388,11 +390,25 @@ docker run -d \
   -e DISCORD_TOKEN=your_discord_token \
   -e PLANE_API_KEY=your_plane_api_key \
   -e CLIENT_ID=your_discord_client_id \
-  -v ./data:/app/data \
+  -v $(pwd)/data:/usr/src/app/data \
   plane-discord-bot
 ```
 
-Note: Mount a volume for `/app/data` to persist channel configurations.
+> **Important:** You MUST mount a volume for `/usr/src/app/data` to persist channel configurations. Without the volume mount, all channel configurations will be lost when the container restarts.
+
+For SQLite storage (optional):
+
+```bash
+docker run -d \
+  --name plane-bot \
+  --restart unless-stopped \
+  -e DISCORD_TOKEN=your_discord_token \
+  -e PLANE_API_KEY=your_plane_api_key \
+  -e CLIENT_ID=your_discord_client_id \
+  -e STORAGE_TYPE=sqlite \
+  -v $(pwd)/data:/usr/src/app/data \
+  plane-discord-bot
+```
 
 ## Contributing
 
