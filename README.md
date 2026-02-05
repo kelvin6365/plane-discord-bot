@@ -414,27 +414,39 @@ docker run -d \
 
 This bot supports deployment on [Coolify](https://coolify.io), a self-hostable PaaS.
 
-### Option 1: Docker Compose (Recommended)
+### Option 1: Nixpacks (Recommended)
 
-1. In Coolify, create a new service and select **Docker Compose**
+Nixpacks is the easiest deployment method with minimal configuration.
+
+1. In Coolify, create a new service and select **Nixpacks**
 2. Connect your Git repository
-3. Set the following environment variables in Coolify:
-   - `DISCORD_TOKEN` - Your Discord bot token
-   - `CLIENT_ID` - Your Discord application client ID
-   - `PLANE_API_KEY` - Your Plane API key
-   - `STORAGE_TYPE` - `json` (default) or `sqlite`
-4. Enable **Persistent Storage** and mount `/usr/src/app/data`
-5. Deploy!
-
-### Option 2: Dockerfile
-
-1. In Coolify, create a new service and select **Dockerfile**
-2. Connect your Git repository
-3. Configure environment variables (same as above)
+3. Set the required environment variables (see table below)
 4. Add a persistent volume:
    - Source: Create a new volume
    - Destination: `/usr/src/app/data`
 5. Deploy!
+
+The included `nixpacks.toml` handles all build configuration automatically.
+
+### Option 2: Docker Compose
+
+1. In Coolify, create a new service and select **Docker Compose**
+2. Connect your Git repository
+3. Set the required environment variables (see table below)
+4. The volume is already configured in `docker-compose.yml`
+5. Deploy!
+
+### Option 3: Dockerfile
+
+1. In Coolify, create a new service and select **Dockerfile**
+2. Connect your Git repository
+3. Configure environment variables (see table below)
+4. Add a persistent volume:
+   - Source: Create a new volume
+   - Destination: `/usr/src/app/data`
+5. Deploy!
+
+The Dockerfile uses Alpine Linux for reliable builds across different environments.
 
 ### Environment Variables for Coolify
 
