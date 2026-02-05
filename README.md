@@ -89,6 +89,8 @@ The bot supports connecting different Discord channels to different Plane worksp
 - Have dedicated channels for different workspaces
 - Manage multiple Plane instances from a single Discord server
 
+> **Important:** Issue commands (`/create-issue`, `/get-issues`, `/view-issue`, `/upload-file`) will only work in channels that have been configured with `/plane-setup`. Unconfigured channels will show a "Channel Not Configured" message prompting an admin to run the setup command.
+
 ### Admin Commands
 
 | Command | Description | Permission |
