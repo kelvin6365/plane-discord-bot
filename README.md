@@ -390,11 +390,25 @@ docker run -d \
   -e DISCORD_TOKEN=your_discord_token \
   -e PLANE_API_KEY=your_plane_api_key \
   -e CLIENT_ID=your_discord_client_id \
-  -v ./data:/app/data \
+  -v $(pwd)/data:/usr/src/app/data \
   plane-discord-bot
 ```
 
-Note: Mount a volume for `/app/data` to persist channel configurations.
+> **Important:** You MUST mount a volume for `/usr/src/app/data` to persist channel configurations. Without the volume mount, all channel configurations will be lost when the container restarts.
+
+For SQLite storage (optional):
+
+```bash
+docker run -d \
+  --name plane-bot \
+  --restart unless-stopped \
+  -e DISCORD_TOKEN=your_discord_token \
+  -e PLANE_API_KEY=your_plane_api_key \
+  -e CLIENT_ID=your_discord_client_id \
+  -e STORAGE_TYPE=sqlite \
+  -v $(pwd)/data:/usr/src/app/data \
+  plane-discord-bot
+```
 
 ## Contributing
 
