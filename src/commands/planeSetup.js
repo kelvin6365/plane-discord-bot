@@ -35,13 +35,13 @@ module.exports = {
     try {
       const workspaceSlug = interaction.options.getString("workspace");
       const projectId = interaction.options.getString("project");
-      const guildId = interaction.guild.id;
+      const guildId = interaction.guildId;
       const channelId = interaction.channelId;
 
       logger.info("Plane setup command initiated", {
         user: interaction.user.tag,
-        guild: interaction.guild.name,
-        channel: interaction.channel.name,
+        guildId,
+        channelId,
         workspaceSlug,
         projectId,
       });
