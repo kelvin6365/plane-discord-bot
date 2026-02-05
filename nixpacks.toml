@@ -1,0 +1,16 @@
+# Nixpacks configuration for Coolify deployment
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "python3", "gcc", "gnumake"]
+
+[phases.install]
+cmds = ["npm ci --omit=dev"]
+
+[phases.build]
+cmds = ["mkdir -p data"]
+
+[start]
+cmd = "npm start"
+
+[variables]
+NODE_ENV = "production"

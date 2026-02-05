@@ -410,6 +410,45 @@ docker run -d \
   plane-discord-bot
 ```
 
+## Coolify Deployment
+
+This bot supports deployment on [Coolify](https://coolify.io), a self-hostable PaaS.
+
+### Option 1: Docker Compose (Recommended)
+
+1. In Coolify, create a new service and select **Docker Compose**
+2. Connect your Git repository
+3. Set the following environment variables in Coolify:
+   - `DISCORD_TOKEN` - Your Discord bot token
+   - `CLIENT_ID` - Your Discord application client ID
+   - `PLANE_API_KEY` - Your Plane API key
+   - `STORAGE_TYPE` - `json` (default) or `sqlite`
+4. Enable **Persistent Storage** and mount `/usr/src/app/data`
+5. Deploy!
+
+### Option 2: Dockerfile
+
+1. In Coolify, create a new service and select **Dockerfile**
+2. Connect your Git repository
+3. Configure environment variables (same as above)
+4. Add a persistent volume:
+   - Source: Create a new volume
+   - Destination: `/usr/src/app/data`
+5. Deploy!
+
+### Environment Variables for Coolify
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DISCORD_TOKEN` | Yes | - | Discord bot token |
+| `CLIENT_ID` | Yes | - | Discord application client ID |
+| `PLANE_API_KEY` | Yes | - | Plane API key |
+| `STORAGE_TYPE` | No | `json` | Storage backend (`json` or `sqlite`) |
+| `LOG_LEVEL` | No | `info` | Logging level |
+| `ENABLE_FILE_LOGS` | No | `false` | Enable file logging |
+
+> **Important:** Always configure persistent storage for `/usr/src/app/data` to preserve channel configurations across deployments.
+
 ## Contributing
 
 1. Fork the repository

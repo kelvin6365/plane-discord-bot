@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  plane-bot:
+    build: .
+    container_name: plane-discord-bot
+    restart: unless-stopped
+    environment:
+      # Required
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - CLIENT_ID=${CLIENT_ID}
+      - PLANE_API_KEY=${PLANE_API_KEY}
+      # Optional
+      - STORAGE_TYPE=${STORAGE_TYPE:-json}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - ENABLE_FILE_LOGS=${ENABLE_FILE_LOGS:-false}
+    volumes:
+      - plane-bot-data:/usr/src/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('healthy')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  plane-bot-data:
+    driver: local
