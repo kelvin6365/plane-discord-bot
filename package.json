@@ -1,12 +1,12 @@
 {
   "name": "plane-discord-bot",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Discord bot for Plane project management",
   "main": "src/index.js",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/plane-discord-bot"
+    "url": "https://github.com/kelvin6365/plane-discord-bot"
   },
   "scripts": {
     "start": "node src/index.js",
@@ -23,6 +23,9 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^11.0.0"
   },
   "engines": {
     "node": ">=16.9.0"

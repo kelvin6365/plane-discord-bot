@@ -1,11 +1,10 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const planeService = require("../services/planeApi");
 const logger = require("../utils/logger");
 const {
   getPriorityEmoji,
   formatState,
   formatDate,
-  getIssueUrl
+  getIssueUrl,
 } = require("../utils/utils");
 
 module.exports = {
@@ -38,7 +37,22 @@ module.exports = {
         )
     ),
 
-  async execute(interaction) {
+  async execute(interaction, { planeService, channelConfig }) {
+    // Check if channel is configured
+    if (!planeService || !channelConfig) {
+      const notConfiguredEmbed = new EmbedBuilder()
+        .setTitle("⚠️ Channel Not Configured")
+        .setDescription(
+          "This channel is not configured for Plane.\n" +
+            "An administrator must use `/plane-setup` to configure this channel first."
+        )
+        .setColor(0xfbbf24)
+        .setTimestamp();
+
+      await interaction.reply({ embeds: [notConfiguredEmbed], ephemeral: true });
+      return;
+    }
+
     await interaction.deferReply();
 
     try {
@@ -48,7 +62,9 @@ module.exports = {
       logger.info("Getting issues command initiated", {
         user: interaction.user.tag,
         guild: interaction.guild?.name,
-        filters: { state, priority }
+        workspace: channelConfig.workspaceSlug,
+        project: channelConfig.projectId,
+        filters: { state, priority },
       });
 
       // Show progress
@@ -58,8 +74,8 @@ module.exports = {
             .setTitle("⏳ Fetching Issues...")
             .setDescription("Please wait while the issues are being fetched.")
             .setColor(0xfbbf24)
-            .setTimestamp()
-        ]
+            .setTimestamp(),
+        ],
       });
 
       const response = await planeService.getAllIssues({
@@ -83,7 +99,7 @@ module.exports = {
 
       logger.info("Issues fetched successfully", {
         count: response.results.length,
-        totalCount: response.count
+        totalCount: response.count,
       });
 
       // Create the main embed
@@ -115,7 +131,8 @@ module.exports = {
         issuesEmbed.addFields({
           name: `${issue.formatted_id} ${issue.name}`,
           value: [
-            `**Priority:** ${priorityEmoji} ${issue.priority?.toUpperCase() || "None"
+            `**Priority:** ${priorityEmoji} ${
+              issue.priority?.toUpperCase() || "None"
             }`,
             `**State:** ${stateText}`,
             `**Created:** ${formatDate(issue.created_at)}`,
@@ -131,7 +148,9 @@ module.exports = {
 
       const errorEmbed = new EmbedBuilder()
         .setTitle("❌ Failed to Fetch Issues")
-        .setDescription(error.message || "An unexpected error occurred while fetching issues.")
+        .setDescription(
+          error.message || "An unexpected error occurred while fetching issues."
+        )
         .setColor(0xdc2626)
         .setTimestamp();
 

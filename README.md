@@ -12,6 +12,105 @@ A Discord bot that integrates with [Plane](https://plane.so), an open-source pro
 
 The bot integrates with Plane's modern and intuitive interface, allowing you to manage your projects seamlessly between Discord and Plane's web interface. Above is an example of Plane's project management view, showcasing its clean design and powerful features.
 
+## Features
+
+- **Multi-Channel Support**: Configure different channels to connect to different Plane workspaces/projects
+- Create new issues with title, description, and priority
+- List issues with filtering by state and priority
+- View detailed issue information with rich embeds
+- Upload files to existing issues
+- Color-coded priority levels (🔴 Urgent, 🟠 High, 🟡 Medium, 🟢 Low)
+- Support for issue labels and attachments
+- Automatic state tracking with visual indicators
+- Beautiful Discord embeds with formatted descriptions
+- Direct integration with Plane's API
+- Flexible storage options (JSON file or SQLite)
+
+## Prerequisites
+
+- Node.js v16.9.0 or higher
+- A Discord bot token and application
+- A [Plane](https://plane.so) account with API access
+  - Workspace(s) created
+  - Project(s) set up
+  - API key generated
+
+## Quick Start
+
+1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd plane-discord-bot
+```
+
+2. Install dependencies
+
+```bash
+npm install
+```
+
+3. Configure environment variables
+   Create a `.env` file in the root directory:
+
+```env
+# Required
+DISCORD_TOKEN=your_discord_bot_token
+CLIENT_ID=your_discord_client_id
+PLANE_API_KEY=your_plane_api_key
+
+# Optional: Storage configuration
+STORAGE_TYPE=json    # "json" (default) or "sqlite"
+```
+
+4. Deploy slash commands
+
+```bash
+npm run deploy
+```
+
+5. Start the bot
+
+```bash
+npm start
+```
+
+6. Configure channels (in Discord, as server admin)
+
+```
+/plane-setup workspace:your-workspace project:your-project-id
+```
+
+## Multi-Channel Configuration
+
+The bot supports connecting different Discord channels to different Plane workspaces and projects. This allows teams to:
+
+- Use one bot across multiple projects
+- Have dedicated channels for different workspaces
+- Manage multiple Plane instances from a single Discord server
+
+### Admin Commands
+
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/plane-setup` | Configure a channel with workspace and project | Admin only |
+| `/plane-config` | View current channel's configuration | Everyone |
+| `/plane-remove` | Remove configuration from a channel | Admin only |
+| `/plane-list` | List all configured channels in the server | Admin only |
+
+### Setup Example
+
+```
+# In #frontend-bugs channel
+/plane-setup workspace:acme-corp project:frontend-project-id
+
+# In #backend-bugs channel
+/plane-setup workspace:acme-corp project:backend-project-id
+
+# In #mobile-team channel (different workspace)
+/plane-setup workspace:mobile-division project:ios-app-id
+```
+
 ## Interface Examples
 
 ### View Issue Command
@@ -60,81 +159,19 @@ Lists issues with:
 • Quick links to Plane
 ```
 
-## Features
-
-- Create new issues with title, description, and priority
-- List issues with filtering by state and priority
-- View detailed issue information with rich embeds
-- Color-coded priority levels (🔴 Urgent, 🟠 High, 🟡 Medium, 🟢 Low)
-- Support for issue labels and attachments
-- Automatic state tracking with visual indicators
-- Beautiful Discord embeds with formatted descriptions
-- Direct integration with Plane's API
-
-## Prerequisites
-
-- Node.js v16.9.0 or higher
-- A Discord bot token and application
-- A [Plane](https://plane.so) account with API access
-  - Workspace created
-  - Project set up
-  - API key generated
-
-## Setup
-
-1. Clone the repository
-
-```bash
-git clone <repository-url>
-cd plane-discord-bot
-```
-
-2. Install dependencies
-
-```bash
-npm install
-```
-
-3. Configure environment variables
-   Create a `.env` file in the root directory with the following variables:
-
-```env
-DISCORD_TOKEN=your_discord_bot_token
-PLANE_API_KEY=your_plane_api_key        # Generate from Plane settings
-WORKSPACE_SLUG=your_workspace_slug      # Found in Plane workspace URL
-PROJECT_ID=your_project_id             # Found in Plane project settings
-CLIENT_ID=your_discord_client_id
-```
-
-4. Deploy slash commands
-
-```bash
-npm run deploy
-```
-
-5. Start the bot
-
-```bash
-npm start
-```
-
 ## Commands
 
-### `/create-issue`
+### Issue Commands
+
+#### `/create-issue`
 
 Create a new issue in Plane.
-
-![Create Issue Example](examples/create-issue.png)
 
 **Options:**
 
 - `title` (required): The title of the issue
 - `description` (optional): The description of the issue
-- `priority` (optional): The priority level
-  - 🔴 Urgent
-  - 🟠 High
-  - 🟡 Medium
-  - 🟢 Low
+- `priority` (optional): The priority level (Urgent, High, Medium, Low)
 
 **Example:**
 
@@ -142,11 +179,9 @@ Create a new issue in Plane.
 /create-issue title: Fix login bug description: Users can't login with Google priority: high
 ```
 
-### `/view-issue`
+#### `/view-issue`
 
 View detailed information about a specific issue.
-
-![View Issue Example](examples/view-issue.png)
 
 **Options:**
 
@@ -158,34 +193,14 @@ View detailed information about a specific issue.
 /view-issue id: PROJ-123
 ```
 
-Shows:
-
-- Issue title and ID
-- Description
-- Priority and state
-- Labels (if any)
-- Attachments (if any)
-- Quick actions
-
-### `/get-issues`
+#### `/get-issues`
 
 Get a list of issues with optional filters.
 
-![Get Issues Example](examples/get-issues.png)
-
 **Options:**
 
-- `state` (optional): Filter by state
-  - 📋 Backlog
-  - ⭕ Unstarted
-  - ▶️ Started
-  - ✅ Completed
-  - ❌ Cancelled
-- `priority` (optional): Filter by priority
-  - 🔴 Urgent
-  - 🟠 High
-  - 🟡 Medium
-  - 🟢 Low
+- `state` (optional): Filter by state (Backlog, Unstarted, Started, Completed, Cancelled)
+- `priority` (optional): Filter by priority (Urgent, High, Medium, Low)
 
 **Example:**
 
@@ -193,11 +208,9 @@ Get a list of issues with optional filters.
 /get-issues state: started priority: high
 ```
 
-### `/upload-file`
+#### `/upload-file`
 
 Upload a file to an existing issue.
-
-![Upload File Example](examples/upload-file.png)
 
 **Options:**
 
@@ -217,6 +230,53 @@ Supported file types:
 - Archives: zip, rar, 7z, tar, gz
 - Code: js, jsx, ts, tsx, py, java, cpp, cs, html, css
 - Other: md, json, xml, yaml, yml
+
+### Configuration Commands
+
+#### `/plane-setup`
+
+Configure the current channel to use a specific Plane workspace and project. **Admin only.**
+
+**Options:**
+
+- `workspace` (required): The Plane workspace slug
+- `project` (required): The Plane project ID
+
+**Example:**
+
+```
+/plane-setup workspace: acme-corp project: proj_abc123
+```
+
+#### `/plane-config`
+
+View the current Plane configuration for this channel.
+
+**Example:**
+
+```
+/plane-config
+```
+
+#### `/plane-remove`
+
+Remove the Plane configuration from this channel. **Admin only.**
+
+**Example:**
+
+```
+/plane-remove
+```
+
+#### `/plane-list`
+
+List all configured channels in this server. **Admin only.**
+
+**Example:**
+
+```
+/plane-list
+```
 
 ## Visual Features
 
@@ -238,15 +298,70 @@ Supported file types:
   - Direct link to Plane issue
   - Attachment information
 
-## Integration Details
+## Storage Options
 
-The bot integrates with Plane using their REST API:
+The bot supports two storage backends for channel configurations:
 
-- Automatic state synchronization
-- Real-time issue creation and updates
-- Support for Plane's custom states and workflows
-- Direct links to Plane's web interface
-- Cached state and label information for better performance
+### JSON Storage (Default)
+
+- No additional dependencies required
+- Stores data in `./data/channels.json`
+- Good for small deployments
+
+### SQLite Storage
+
+- Requires `better-sqlite3` package
+- Stores data in `./data/channels.db`
+- Better for larger deployments with many channels
+
+To use SQLite:
+
+```bash
+npm install better-sqlite3
+```
+
+Then set in `.env`:
+
+```env
+STORAGE_TYPE=sqlite
+```
+
+## Environment Variables
+
+Create a `.env` file in the root directory with the following configuration:
+
+```env
+# Discord Bot Configuration
+DISCORD_TOKEN=your_discord_bot_token    # Your Discord bot token from Discord Developer Portal
+CLIENT_ID=your_discord_client_id        # Your Discord application client ID
+
+# Plane Configuration
+PLANE_API_KEY=your_plane_api_key        # Your Plane API key from Settings > API Tokens
+
+# Storage Configuration (optional)
+STORAGE_TYPE=json                       # Storage backend: "json" (default) or "sqlite"
+# STORAGE_PATH=./data                   # Optional: custom path for storage file
+
+# Logging Configuration (optional)
+LOG_LEVEL=info                          # Logging level: debug, info, warn, error
+ENABLE_FILE_LOGS=false                  # Enable logging to files: true/false
+```
+
+### Where to Find the Values
+
+#### Discord Configuration
+
+1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
+2. Create or select your application
+3. `CLIENT_ID`: Found in OAuth2 > General
+4. `DISCORD_TOKEN`: Found in Bot > Token (Reset Token if needed)
+
+#### Plane Configuration
+
+1. `PLANE_API_KEY`: Generate from Settings > API Tokens
+2. `WORKSPACE_SLUG`: The identifier in your Plane workspace URL
+   - Example: `https://app.plane.so/YOUR-WORKSPACE-SLUG/...`
+3. `PROJECT_ID`: Found in Project Settings > General
 
 ## Development
 
@@ -272,11 +387,12 @@ docker run -d \
   --restart unless-stopped \
   -e DISCORD_TOKEN=your_discord_token \
   -e PLANE_API_KEY=your_plane_api_key \
-  -e WORKSPACE_SLUG=your_workspace_slug \
-  -e PROJECT_ID=your_project_id \
   -e CLIENT_ID=your_discord_client_id \
+  -v ./data:/app/data \
   plane-discord-bot
 ```
+
+Note: Mount a volume for `/app/data` to persist channel configurations.
 
 ## Contributing
 
@@ -295,49 +411,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Plane Website](https://plane.so)
 - [Plane API Documentation](https://developers.plane.so)
 - [Discord.js Documentation](https://discord.js.org)
-
-## Environment Variables
-
-Create a `.env` file in the root directory with the following configuration:
-
-```env
-# Discord Bot Configuration
-DISCORD_TOKEN=your_discord_bot_token    # Your Discord bot token from Discord Developer Portal
-CLIENT_ID=your_discord_client_id        # Your Discord application client ID
-
-# Plane Configuration
-PLANE_API_KEY=your_plane_api_key        # Your Plane API key from Settings > API Tokens
-WORKSPACE_SLUG=your_workspace_slug      # Found in your Plane workspace URL
-PROJECT_ID=your_project_id             # Found in Project Settings > General
-
-# Logging Configuration
-LOG_LEVEL=info                         # Logging level: debug, info, warn, error
-ENABLE_FILE_LOGS=false                 # Enable logging to files: true/false
-```
-
-### Where to Find the Values
-
-#### Discord Configuration
-
-1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
-2. Create or select your application
-3. `CLIENT_ID`: Found in OAuth2 > General
-4. `DISCORD_TOKEN`: Found in Bot > Token (Reset Token if needed)
-
-#### Plane Configuration
-
-1. `WORKSPACE_SLUG`: The identifier in your Plane workspace URL
-   - Example: `https://app.plane.so/YOUR-WORKSPACE-SLUG/...`
-2. `PROJECT_ID`: Found in Project Settings > General
-3. `PLANE_API_KEY`: Generate from Settings > API Tokens
-
-#### Logging Configuration
-
-- `LOG_LEVEL`: Set the verbosity of logs
-  - `error`: Only errors
-  - `warn`: Errors and warnings
-  - `info`: General information (recommended)
-  - `debug`: Detailed debugging information
-- `ENABLE_FILE_LOGS`: Enable logging to files
-  - `true`: Logs will be saved to `logs/` directory
-  - `false`: Logs only appear in console
