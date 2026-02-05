@@ -1,5 +1,4 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const planeService = require("../services/planeApi");
 const logger = require("../utils/logger");
 const {
   getPriorityEmoji,
@@ -34,13 +33,30 @@ module.exports = {
         )
     ),
 
-  async execute(interaction) {
+  async execute(interaction, { planeService, channelConfig }) {
+    // Check if channel is configured
+    if (!planeService || !channelConfig) {
+      const notConfiguredEmbed = new EmbedBuilder()
+        .setTitle("⚠️ Channel Not Configured")
+        .setDescription(
+          "This channel is not configured for Plane.\n" +
+            "An administrator must use `/plane-setup` to configure this channel first."
+        )
+        .setColor(0xfbbf24)
+        .setTimestamp();
+
+      await interaction.reply({ embeds: [notConfiguredEmbed], ephemeral: true });
+      return;
+    }
+
     await interaction.deferReply();
 
     try {
       logger.info("Creating new issue command initiated", {
         user: interaction.user.tag,
         guild: interaction.guild?.name,
+        workspace: channelConfig.workspaceSlug,
+        project: channelConfig.projectId,
       });
 
       const title = interaction.options.getString("title");
