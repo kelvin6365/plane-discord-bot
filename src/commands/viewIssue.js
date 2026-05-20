@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
 const logger = require("../utils/logger");
 const {
   getPriorityEmoji,
@@ -90,7 +90,7 @@ module.exports = {
         .setColor(0xfbbf24)
         .setTimestamp();
 
-      await interaction.reply({ embeds: [notConfiguredEmbed], ephemeral: true });
+      await interaction.reply({ embeds: [notConfiguredEmbed], flags: MessageFlags.Ephemeral });
       return;
     }
 

@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   EmbedBuilder,
   PermissionFlagsBits,
+  MessageFlags,
 } = require("discord.js");
 const channelConfigManager = require("../services/ChannelConfigManager");
 const planeServiceManager = require("../services/PlaneServiceManager");
@@ -30,7 +31,7 @@ module.exports = {
 
   // Admin command - does not need planeService context
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     try {
       const workspaceSlug = interaction.options.getString("workspace");

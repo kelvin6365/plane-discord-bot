@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
 const channelConfigManager = require("../services/ChannelConfigManager");
 const logger = require("../utils/logger");
 
@@ -10,7 +10,7 @@ module.exports = {
 
   // Admin command - does not need planeService context
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     try {
       const guildId = interaction.guildId;

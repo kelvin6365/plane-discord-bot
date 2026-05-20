@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-05-20
+
+### Fixed
+
+- `/plane-list` crashed with `Cannot read properties of null (reading 'id')` when `interaction.guild` was not yet hydrated in the client cache. Now reads `interaction.guildId` (always present on guild interactions) and guards the channel-name lookup against a missing guild object.
+
+### Changed
+
+- Replaced deprecated `{ ephemeral: true }` reply option with `{ flags: MessageFlags.Ephemeral }` across all commands and the global error handler, silencing the discord.js v14.16+ deprecation warning and forward-compatibility with the next major.
+
 ## [2.1.0] - 2026-05-20
 
 ### Security

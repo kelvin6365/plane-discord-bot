@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   EmbedBuilder,
   PermissionFlagsBits,
+  MessageFlags,
 } = require("discord.js");
 const channelConfigManager = require("../services/ChannelConfigManager");
 const logger = require("../utils/logger");
@@ -15,14 +16,15 @@ module.exports = {
 
   // Admin command - does not need planeService context
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     try {
-      const guildId = interaction.guild.id;
+      const guildId = interaction.guildId;
+      const guild = interaction.guild;
 
       logger.debug("Plane list command initiated", {
         user: interaction.user.tag,
-        guild: interaction.guild.name,
+        guild: guild?.name ?? guildId,
       });
 
       const configs = await channelConfigManager.listGuildConfigs(guildId);
@@ -51,7 +53,7 @@ module.exports = {
       const maxFields = Math.min(configs.length, 25);
       for (let i = 0; i < maxFields; i++) {
         const { channelId, config } = configs[i];
-        const channel = interaction.guild.channels.cache.get(channelId);
+        const channel = guild?.channels.cache.get(channelId);
         const channelName = channel ? `#${channel.name}` : `<#${channelId}>`;
 
         listEmbed.addFields({

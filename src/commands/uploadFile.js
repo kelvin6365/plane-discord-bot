@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
 const logger = require("../utils/logger");
 const { getIssueUrl } = require("../utils/utils");
 const { MAX_FILE_SIZE } = require("../services/planeApi");
@@ -44,7 +44,7 @@ module.exports = {
         .setColor(0xfbbf24)
         .setTimestamp();
 
-      await interaction.reply({ embeds: [notConfiguredEmbed], ephemeral: true });
+      await interaction.reply({ embeds: [notConfiguredEmbed], flags: MessageFlags.Ephemeral });
       return;
     }
 
@@ -59,7 +59,7 @@ module.exports = {
         )
         .setColor(0xdc2626)
         .setTimestamp();
-      await interaction.reply({ embeds: [tooLargeEmbed], ephemeral: true });
+      await interaction.reply({ embeds: [tooLargeEmbed], flags: MessageFlags.Ephemeral });
       return;
     }
 
