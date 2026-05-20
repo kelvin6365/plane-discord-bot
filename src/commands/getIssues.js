@@ -118,8 +118,8 @@ module.exports = {
       // Add each issue as a field
       response.results.forEach((issue) => {
         const issueUrl = getIssueUrl(
-          planeService.config.WORKSPACE_SLUG,
-          planeService.config.PROJECT_ID,
+          planeService.workspaceSlug,
+          planeService.projectId,
           issue.id
         );
         const priorityEmoji = getPriorityEmoji(issue.priority);

@@ -6,6 +6,15 @@ const logger = require("../utils/logger");
 // Maximum file size (10MB)
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
+// Cache TTL for per-project metadata (states, labels, project details)
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+// Default API timeout (ms)
+const API_TIMEOUT_MS = 30 * 1000;
+const UPLOAD_TIMEOUT_MS = 60 * 1000;
+
+const { escapeHtml } = require("../utils/utils");
+
 // File type mappings
 const FILE_ICONS = {
   // Document types
@@ -138,6 +147,7 @@ const MIME_TYPES = {
 
 const planeApi = axios.create({
   baseURL: "https://api.plane.so/api/v1",
+  timeout: API_TIMEOUT_MS,
   headers: {
     "X-API-Key": config.PLANE_API_KEY,
     "Content-Type": "application/json",
@@ -158,13 +168,7 @@ class PlaneService {
     this.workspaceSlug = workspaceSlug;
     this.projectId = projectId;
 
-    // Maintain backward compatibility with existing code that uses this.config
-    this.config = {
-      WORKSPACE_SLUG: workspaceSlug,
-      PROJECT_ID: projectId,
-    };
-
-    // Instance-specific caches
+    // Instance-specific caches: { value, expiresAt }
     this.statesCache = null;
     this.labelsCache = null;
     this.projectCache = null;
@@ -175,10 +179,14 @@ class PlaneService {
     });
   }
 
+  _cacheValid(entry) {
+    return entry && entry.expiresAt > Date.now();
+  }
+
   async getStates() {
-    if (this.statesCache) {
+    if (this._cacheValid(this.statesCache)) {
       logger.debug("Returning states from cache");
-      return this.statesCache;
+      return this.statesCache.value;
     }
 
     try {
@@ -192,7 +200,7 @@ class PlaneService {
         return {};
       }
 
-      this.statesCache = response.data.results.reduce((acc, state) => {
+      const value = response.data.results.reduce((acc, state) => {
         acc[state.id] = {
           name: state.name,
           color: state.color,
@@ -203,10 +211,11 @@ class PlaneService {
         };
         return acc;
       }, {});
+      this.statesCache = { value, expiresAt: Date.now() + CACHE_TTL_MS };
       logger.debug("States cached successfully", {
-        count: Object.keys(this.statesCache).length,
+        count: Object.keys(value).length,
       });
-      return this.statesCache;
+      return value;
     } catch (error) {
       logger.error("Error fetching states", error);
       return {};
@@ -214,9 +223,9 @@ class PlaneService {
   }
 
   async getLabels() {
-    if (this.labelsCache) {
+    if (this._cacheValid(this.labelsCache)) {
       logger.debug("Returning labels from cache");
-      return this.labelsCache;
+      return this.labelsCache.value;
     }
 
     try {
@@ -228,17 +237,18 @@ class PlaneService {
         logger.error("Invalid labels response", { response: response.data });
         return {};
       }
-      this.labelsCache = response.data.results.reduce((acc, label) => {
+      const value = response.data.results.reduce((acc, label) => {
         acc[label.id] = {
           name: label.name,
           color: label.color,
         };
         return acc;
       }, {});
+      this.labelsCache = { value, expiresAt: Date.now() + CACHE_TTL_MS };
       logger.debug("Labels cached successfully", {
-        count: Object.keys(this.labelsCache).length,
+        count: Object.keys(value).length,
       });
-      return this.labelsCache;
+      return value;
     } catch (error) {
       logger.error("Error fetching labels", error);
       return {};
@@ -250,9 +260,9 @@ class PlaneService {
    * @returns {Promise<PlaneProject>}
    */
   async getProjectDetails() {
-    if (this.projectCache) {
+    if (this._cacheValid(this.projectCache)) {
       logger.debug("Returning project details from cache");
-      return this.projectCache;
+      return this.projectCache.value;
     }
 
     try {
@@ -260,12 +270,15 @@ class PlaneService {
       const response = await planeApi.get(
         `/workspaces/${this.workspaceSlug}/projects/${this.projectId}/`
       );
-      this.projectCache = response.data;
+      this.projectCache = {
+        value: response.data,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      };
       logger.debug("Project details cached successfully", {
-        identifier: this.projectCache.identifier,
-        name: this.projectCache.name,
+        identifier: response.data.identifier,
+        name: response.data.name,
       });
-      return this.projectCache;
+      return response.data;
     } catch (error) {
       logger.error("Error fetching project details", error);
       throw error;
@@ -333,7 +346,7 @@ class PlaneService {
         logger.warn("No issues found or invalid response", {
           response: response.data,
         });
-        return [];
+        return { results: [], total_count: 0, count: 0 };
       }
 
       const enhancedResults = response.data.results.map((issue) => ({
@@ -350,18 +363,19 @@ class PlaneService {
       };
     } catch (error) {
       logger.error("Error fetching all issues", error);
-      return [];
+      return { results: [], total_count: 0, count: 0 };
     }
   }
 
   async createIssue(title, description, priority) {
     try {
       logger.info("Creating new issue", { title, priority });
+      const safeDescription = escapeHtml(description);
       const response = await planeApi.post(
         `/workspaces/${this.workspaceSlug}/projects/${this.projectId}/issues/`,
         {
           name: title,
-          description_html: `<p class="editor-paragraph-block">${description}</p>`,
+          description_html: `<p class="editor-paragraph-block">${safeDescription}</p>`,
           priority,
         }
       );
@@ -548,6 +562,7 @@ class PlaneService {
         uploadCredentialsResponse = await axios({
           method: "post",
           url: `https://api.plane.so/api/v1/workspaces/${this.workspaceSlug}/projects/${this.projectId}/issues/${issueId}/issue-attachments/`,
+          timeout: API_TIMEOUT_MS,
           headers: {
             "Content-Type": "application/json",
             "x-api-key": config.PLANE_API_KEY,
@@ -602,6 +617,9 @@ class PlaneService {
 
       try {
         await axios.post(upload_data.url, formData, {
+          timeout: UPLOAD_TIMEOUT_MS,
+          maxBodyLength: MAX_FILE_SIZE + 1024 * 1024,
+          maxContentLength: MAX_FILE_SIZE + 1024 * 1024,
           headers: {
             ...formData.getHeaders(),
             "Content-Type": "multipart/form-data",
@@ -621,6 +639,7 @@ class PlaneService {
         const completeResponse = await axios({
           method: "patch",
           url: `https://api.plane.so/api/v1/workspaces/${this.workspaceSlug}/projects/${this.projectId}/issues/${issueId}/issue-attachments/${asset_id}`,
+          timeout: API_TIMEOUT_MS,
           headers: {
             "Content-Type": "application/json",
             "x-api-key": config.PLANE_API_KEY,
@@ -648,3 +667,4 @@ class PlaneService {
 
 // Export the class itself (not an instance) to support multiple instances
 module.exports = PlaneService;
+module.exports.MAX_FILE_SIZE = MAX_FILE_SIZE;

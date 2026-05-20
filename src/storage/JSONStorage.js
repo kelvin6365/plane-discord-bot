@@ -51,10 +51,22 @@ class JSONStorage extends BaseStorage {
    * @private
    */
   async _persist() {
-    this.writeQueue = this.writeQueue.then(async () => {
-      await fs.writeFile(this.filePath, JSON.stringify(this.data, null, 2));
+    const next = this.writeQueue.then(
+      async () => {
+        await fs.writeFile(this.filePath, JSON.stringify(this.data, null, 2));
+      },
+      // Recover from a previously-rejected write so the queue stays alive.
+      async () => {
+        await fs.writeFile(this.filePath, JSON.stringify(this.data, null, 2));
+      }
+    );
+    // Keep the chain on a swallowed promise — callers still see this write's
+    // rejection via the returned `next`, but future _persist() calls won't
+    // inherit a poisoned chain.
+    this.writeQueue = next.catch((err) => {
+      logger.error("JSONStorage write failed", err);
     });
-    return this.writeQueue;
+    return next;
   }
 
   async get(key) {

@@ -3,6 +3,13 @@ const fs = require("node:fs");
 const path = require("node:path");
 const config = require("./config/config");
 
+try {
+  config.validateConfig();
+} catch (err) {
+  console.error(err.message);
+  process.exit(1);
+}
+
 const commands = [];
 const commandsPath = path.join(__dirname, "commands");
 const commandFiles = fs
@@ -23,12 +30,13 @@ const rest = new REST().setToken(config.DISCORD_TOKEN);
   try {
     console.log("Started refreshing application (/) commands.");
 
-    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+    await rest.put(Routes.applicationCommands(config.CLIENT_ID), {
       body: commands,
     });
 
     console.log("Successfully reloaded application (/) commands.");
   } catch (error) {
     console.error(error);
+    process.exit(1);
   }
 })();

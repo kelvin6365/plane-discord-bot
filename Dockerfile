@@ -42,9 +42,9 @@ USER botuser
 # Volume for persistent channel configuration data
 VOLUME ["/usr/src/app/data"]
 
-# Health check (verify process is running)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD node -e "console.log('healthy')" || exit 1
+# Health check: confirm the bot is writing heartbeats (mtime within 90s)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD node -e "const fs=require('fs');try{const age=Date.now()-fs.statSync('/usr/src/app/data/.heartbeat').mtimeMs;process.exit(age<90000?0:1)}catch(e){process.exit(1)}"
 
 # Start the bot
 CMD [ "npm", "start" ]

@@ -62,6 +62,16 @@ const getIssueUrl = (workspaceSlug, projectId, issueId) => {
   return `https://app.plane.so/${workspaceSlug}/projects/${projectId}/issues/${issueId}`;
 };
 
+const escapeHtml = (str) => {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
+
 const formatLabels = (labels) => {
   if (!labels || labels.length === 0) return [];
 
@@ -88,4 +98,5 @@ module.exports = {
   formatDescription,
   getIssueUrl,
   formatLabels,
+  escapeHtml,
 };

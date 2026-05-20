@@ -94,8 +94,8 @@ module.exports = {
       const latestIssue = await planeService.getIssueById(issue.id);
 
       const issueUrl = getIssueUrl(
-        planeService.config.WORKSPACE_SLUG,
-        planeService.config.PROJECT_ID,
+        planeService.workspaceSlug,
+        planeService.projectId,
         issue.id
       );
 

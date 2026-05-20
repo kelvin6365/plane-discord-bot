@@ -21,7 +21,7 @@ const formatAttachments = (attachments, planeService) => {
     const size = planeService.formatFileSize(attachment.attributes.size);
     otherAttachments.push({
       name: attachment.attributes.name,
-      url: `https://api.plane.so/api/assets/v2/workspaces/${planeService.config.WORKSPACE_SLUG}/projects/${planeService.config.PROJECT_ID}/issues/${attachment.issue}/attachments/${attachment.id}`,
+      url: `https://api.plane.so/api/assets/v2/workspaces/${planeService.workspaceSlug}/projects/${planeService.projectId}/issues/${attachment.issue}/attachments/${attachment.id}`,
       size: size,
       icon: icon,
     });
@@ -129,8 +129,8 @@ module.exports = {
       });
 
       const issueUrl = getIssueUrl(
-        planeService.config.WORKSPACE_SLUG,
-        planeService.config.PROJECT_ID,
+        planeService.workspaceSlug,
+        planeService.projectId,
         issue.id
       );
 

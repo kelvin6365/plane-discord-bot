@@ -1,7 +1,19 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const logger = require("../utils/logger");
 const { getIssueUrl } = require("../utils/utils");
+const { MAX_FILE_SIZE } = require("../services/planeApi");
 const axios = require("axios");
+
+function formatBytes(bytes) {
+  const units = ["B", "KB", "MB", "GB"];
+  let size = bytes;
+  let i = 0;
+  while (size >= 1024 && i < units.length - 1) {
+    size /= 1024;
+    i++;
+  }
+  return `${size.toFixed(1)} ${units[i]}`;
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -36,11 +48,25 @@ module.exports = {
       return;
     }
 
+    const attachment = interaction.options.getAttachment("file");
+
+    // Reject oversized files before doing any work
+    if (attachment.size > MAX_FILE_SIZE) {
+      const tooLargeEmbed = new EmbedBuilder()
+        .setTitle("❌ File Too Large")
+        .setDescription(
+          `File size (${formatBytes(attachment.size)}) exceeds the ${formatBytes(MAX_FILE_SIZE)} limit.`
+        )
+        .setColor(0xdc2626)
+        .setTimestamp();
+      await interaction.reply({ embeds: [tooLargeEmbed], ephemeral: true });
+      return;
+    }
+
     await interaction.deferReply();
 
     try {
       const sequenceId = interaction.options.getString("id").toUpperCase();
-      const attachment = interaction.options.getAttachment("file");
 
       logger.info("File upload command initiated", {
         user: interaction.user.tag,
@@ -103,8 +129,8 @@ module.exports = {
       );
 
       const issueUrl = getIssueUrl(
-        planeService.config.WORKSPACE_SLUG,
-        planeService.config.PROJECT_ID,
+        planeService.workspaceSlug,
+        planeService.projectId,
         issue.id
       );
 
