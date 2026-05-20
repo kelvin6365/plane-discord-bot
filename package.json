@@ -1,6 +1,6 @@
 {
   "name": "plane-discord-bot",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Discord bot for Plane project management",
   "main": "src/index.js",
   "license": "MIT",

@@ -4,7 +4,7 @@ FROM node:20-alpine
 # Labels
 LABEL org.opencontainers.image.title="Plane Discord Bot"
 LABEL org.opencontainers.image.description="Discord bot for Plane project management with multi-channel support"
-LABEL org.opencontainers.image.version="2.0.0"
+LABEL org.opencontainers.image.version="2.1.0"
 
 # Create app directory
 WORKDIR /usr/src/app

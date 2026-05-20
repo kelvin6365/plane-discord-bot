@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-05-20
+
+### Security
+
+- **HTML injection fix**: Issue descriptions are now HTML-escaped before being sent to Plane's `description_html` field, preventing markup-breaking or script-injection payloads from being persisted
+
+### Added
+
+- Required env vars (`DISCORD_TOKEN`, `CLIENT_ID`, `PLANE_API_KEY`) are now validated at startup; the bot exits with a clear error listing what's missing instead of failing cryptically later
+- Graceful shutdown on `SIGTERM`/`SIGINT`: flushes storage, destroys the Discord client, exits cleanly
+- Discord client `error`/`shardError`/`warn` listeners and `unhandledRejection` trap (no more silent process crashes)
+- Heartbeat-file based Docker healthcheck (`/usr/src/app/data/.heartbeat`, refreshed every 30s) replaces the no-op `console.log` check
+- Test suite using Node's built-in `node:test` runner (27 tests, zero new deps) — run with `npm test`
+- `CLAUDE.md` repository guide for AI coding assistants
+
+### Changed
+
+- All Plane API calls now have a 30s timeout (60s for uploads); stalled requests no longer hang Discord interactions indefinitely
+- `getAllIssues` returns a consistent `{ results, count, total_count }` shape on both success and error paths
+- States, labels, and project details caches now expire after 5 minutes so renames in Plane propagate without a bot restart
+- `JSONStorage` write queue survives failed writes (e.g. read-only filesystem) without poisoning subsequent writes
+- `/upload-file` rejects oversized attachments before downloading them from Discord
+- Removed the legacy `PlaneService.config` shim and unused `WORKSPACE_SLUG`/`PROJECT_ID` env keys; callers now use `planeService.workspaceSlug`/`projectId` directly
+
+### Deployment notes
+
+- The Docker healthcheck requires `/usr/src/app/data` to be writable (already required for channel storage)
+- Deployments with previously-undetected missing env vars will now fail at startup rather than at first API call — verify your env before upgrading
+
 ## [2.0.0] - 2025-02-05
 
 ### Added
